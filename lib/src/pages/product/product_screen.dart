@@ -5,7 +5,10 @@ import 'package:teste/src/pages/common_widgets/quantity_widget.dart';
 import 'package:teste/src/services/utils_services.dart';
 
 class ProductScreen extends StatefulWidget {
-  ProductScreen({super.key, required this.item});
+   ProductScreen({
+    super.key, 
+    required this.item,
+    });
 
   final ItemModel item;
 

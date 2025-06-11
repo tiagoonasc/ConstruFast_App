@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:teste/src/pages/cart/cart_tab.dart';
 import 'package:teste/src/pages/home/home_tab.dart';
 
 // ignore: must_be_immutable
@@ -21,7 +22,7 @@ class _BaseScreenState extends State<BaseScreen> {
         controller: pageController,
         children: [
          const HomeTab (),
-          Container(color: Colors.yellow),
+          CartTab(),
           Container(color: Colors.blue),
           Container(color: Colors.purple),
         ],

@@ -1,3 +1,4 @@
+import 'package:teste/src/models/cart_item_model.dart';
 import 'package:teste/src/models/item_model.dart';
 
 ItemModel cimento = ItemModel(
@@ -11,7 +12,7 @@ ItemModel furadeira = ItemModel(
   description: 'Furadeira de auto rendimento',
   imgUrl: 'assets/materiais/furadeira.png',
   itemName: 'Furadeira',
-  price: 239.90, 
+  price: 239.90,
   unit: 'RS',
 );
 ItemModel piso = ItemModel(
@@ -43,19 +44,27 @@ ItemModel torneira = ItemModel(
   unit: 'RS',
 );
 
-List<ItemModel> items = [
-  cimento,
-   furadeira,
-    piso,
-     tijolo,
-      tinta,
-       torneira
-       ];
+List<ItemModel> items = [cimento, furadeira, piso, tijolo, tinta, torneira];
 
-       List<String> categories = [
-    'Materiais de construção',
-    'Metais',
-    'Pintura',
-    'Pisos',
-    'Ferramentas',
-  ];
+List<String> categories = [
+  'Materiais de construção',
+  'Metais',
+  'Pintura',
+  'Pisos',
+  'Ferramentas',
+];
+
+List<CartItemModel> cartItems = [
+  CartItemModel(
+    item: cimento, 
+    quantity: 5,
+    ),
+  CartItemModel(
+    item: furadeira, 
+    quantity: 1,
+    ),
+  CartItemModel(
+    item: piso, 
+    quantity: 32,
+    ),
+];
