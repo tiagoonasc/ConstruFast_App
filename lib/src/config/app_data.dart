@@ -1,5 +1,7 @@
 import 'package:teste/src/models/cart_item_model.dart';
 import 'package:teste/src/models/item_model.dart';
+import 'package:teste/src/models/order_model.dart';
+import 'package:teste/src/models/user_model.dart';
 
 ItemModel cimento = ItemModel(
   description: 'Cimento Votoran o melhor para sua obra',
@@ -67,4 +69,56 @@ List<CartItemModel> cartItems = [
     item: piso, 
     quantity: 32,
     ),
+];
+  UserModel user = UserModel(
+  phone: '99 9 9999-9999',
+  cpf: '999.999.999-99',
+  email: 'Tiago@email.com',
+  name: 'Tiago Nascimento',
+  password: '',
+);
+
+List<OrderModel> orders = [
+   // Pedido 01
+  OrderModel(
+    copyAndPaste: 'q1w2e3r4t5y6',
+    createdDateTime: DateTime.parse(
+      '2025-06-14 23:00:10.458',
+    ),
+    overdueDateTime: DateTime.parse(
+      '2025-06-08 11:00:10.458',
+    ),
+    id: 'asd6a54da6s2d1',
+    status: 'pending_payment',
+    total: 85.80,
+    items: [
+      CartItemModel(
+        item: cimento,
+        quantity: 2,
+      ),
+             CartItemModel(
+        item: furadeira,
+        quantity: 3,
+         ),
+    ],
+  ),
+  // Pedido 02
+  OrderModel(
+    copyAndPaste: 'q1w2e3r4t5y6',
+    createdDateTime: DateTime.parse(
+      '2025-06-08 10:00:10.458',
+    ),
+    overdueDateTime: DateTime.parse(
+      '2025-09-08 11:00:10.458',
+    ),
+    id: 'a65s4d6a2s1d6a5s',
+    status: 'delivered',
+    total: 715.80,
+    items: [
+      CartItemModel(
+        item: torneira,
+        quantity: 1,
+      ),
+    ],
+  ),
 ];

@@ -79,7 +79,7 @@ class _ProductScreenState extends State<ProductScreen> {
 
                       // Preço
                       Text(
-                        utilsServices.priceToCurrency(widget.item.price),
+                        utilsServices.priceToCurrency(widget.item.price,2),
                         style: TextStyle(
                           fontSize: 23,
                           fontWeight: FontWeight.bold,

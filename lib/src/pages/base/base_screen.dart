@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:teste/src/pages/cart/cart_tab.dart';
 import 'package:teste/src/pages/home/home_tab.dart';
+import 'package:teste/src/pages/orders/orders_tab.dart';
+import 'package:teste/src/pages/profile/profile_tab.dart';
 
 // ignore: must_be_immutable
 class BaseScreen extends StatefulWidget {
- const BaseScreen({super.key});
+  const BaseScreen({super.key});
 
   @override
   State<BaseScreen> createState() => _BaseScreenState();
@@ -18,14 +20,9 @@ class _BaseScreenState extends State<BaseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: PageView(
-        physics:const NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         controller: pageController,
-        children: [
-         const HomeTab (),
-          CartTab(),
-          Container(color: Colors.blue),
-          Container(color: Colors.purple),
-        ],
+        children: const [HomeTab(), CartTab(), OrdersTab(), ProfileTab()],
       ),
 
       bottomNavigationBar: BottomNavigationBar(
@@ -33,7 +30,12 @@ class _BaseScreenState extends State<BaseScreen> {
         onTap: (index) {
           setState(() {
             currentIndex = index;
-            pageController.jumpToPage(index);
+            //pageController.jumpToPage(index);
+            pageController.animateToPage(
+              index,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.ease,
+            );
           });
         },
         type: BottomNavigationBarType.fixed,

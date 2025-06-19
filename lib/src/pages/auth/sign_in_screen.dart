@@ -1,6 +1,7 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
-import 'package:teste/src/pages/auth/components/custom_text_field.dart';
+import 'package:teste/src/pages/common_widgets/app_name_widget.dart';
+import 'package:teste/src/pages/common_widgets/custom_text_field.dart';
 import 'package:teste/src/pages/auth/sign_up_screen.dart';
 import 'package:teste/src/pages/base/base_screen.dart';
 import 'package:teste/src/config/custom_colors.dart';
@@ -26,27 +27,10 @@ class SignInScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     //Nome do App
-                    Text.rich(
-                      TextSpan(
-                        style: const TextStyle(fontSize: 40),
-                        children: [
-                          const TextSpan(
-                            text: 'Constru',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextSpan(
-                            text: 'Fast',
-                            style: TextStyle(
-                              color: CustomColors.customContrastColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
+                   const AppNameWidget(
+                    greenTitleColor: Colors.white,
+                    textSize: 40,
+                  ),
                     //Categorias
                     SizedBox(
                       height: 30,
