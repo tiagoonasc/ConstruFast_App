@@ -38,7 +38,7 @@ class _CartTileState extends State<CartTile> {
 
         // Total
         subtitle: Text(
-          utilsServices.priceToCurrency(widget.cartItem.item.price, 2),
+          utilsServices.priceToCurrency(widget.cartItem.totalPrice(), 2),
           style: TextStyle(
             color: CustomColors.customSwatchColor,
             fontWeight: FontWeight.bold,
