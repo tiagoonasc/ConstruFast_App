@@ -49,7 +49,7 @@ ItemModel torneira = ItemModel(
 List<ItemModel> items = [cimento, furadeira, piso, tijolo, tinta, torneira];
 
 List<String> categories = [
-  'Materiais de construção',
+  'Materiais de construção', 
   'Metais',
   'Pintura',
   'Pisos',

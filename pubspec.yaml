@@ -42,6 +42,8 @@ dependencies:
   add_to_cart_animation: ^0.0.7
   fluttertoast: ^8.2.12
   shimmer: ^3.0.0
+  firebase_core: ^3.14.0
+  firebase_auth: ^5.6.0
   
 
   

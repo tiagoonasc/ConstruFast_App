@@ -6,21 +6,19 @@ import 'package:teste/src/config/custom_colors.dart';
 class SignUpScreen extends StatelessWidget {
    SignUpScreen({super.key,});
 
-  final cpfFormatter = MaskTextInputFormatter(
+   final cpfFormatter = MaskTextInputFormatter(
     mask: '###.###.###-##',
-    filter: {'#' : RegExp(r'[0-9]')},
-  );
- 
-  final phoneFormatter = MaskTextInputFormatter(
-    mask: '## # ####-####',
-    filter: {'#' : RegExp(r'[0-9]')},
+    filter: {'#': RegExp(r'[0-9]')},
   );
 
-  
+  final phoneFormatter = MaskTextInputFormatter(
+    mask: '## # ####-####',
+    filter: {'#': RegExp(r'[0-9]')},
+  );
 
   @override
   Widget build(BuildContext context) {
-     final size = MediaQuery.of(context).size;
+    final size = MediaQuery.of(context).size;
 
     return Scaffold(
       backgroundColor: CustomColors.customSwatchColor,
@@ -30,79 +28,80 @@ class SignUpScreen extends StatelessWidget {
           width: size.width,
           child: Stack(
             children: [
-            const Expanded(
-            child: Center(
-              child: Text(
-                'Cadastro',
-                 style: TextStyle(
-                color: Colors.white,
-                fontSize: 35,
-              ),),
-            ),
-          ),
-          
-          //Formulario
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 32,
-              vertical: 40,
-            ),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(45)
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-          
-               const CustomTextField(
-                  icon: Icons.email,
-                   label: 'Email',
-                   ),
-               const CustomTextField(
-                  icon: Icons.lock,
-                   label: 'Senha',
-                    isSecret: true ,
-                    ),
-               const CustomTextField(
-                  icon: Icons.person,
-                   label: 'Nome',
-                   ),
-                CustomTextField(
-                  icon: Icons.phone,
-                   label: 'Celular',
-                   inputFomatters: [phoneFormatter],
-                   ),
-                CustomTextField(
-                  icon: Icons.file_copy,
-                   label: 'CPF',
-                inputFomatters: [cpfFormatter],
-
-                   ),
-              const  CustomTextField(
-                  icon: Icons.location_city,
-                   label: 'Endereço',
-                   ),
-                 
-                  SizedBox(
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        )
-                      ),
-                      onPressed: () {},
-                       child: const Text(
-                        'Cadastrar usuário', 
+              Column(
+                children: [
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        'Cadastro',
                         style: TextStyle(
-                        fontSize: 18,
-                       ),),
+                          color: Colors.white,
+                          fontSize: 35,
+                        ),
+                      ),
                     ),
                   ),
-          
+
+                  // Formulario
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 40,
+                    ),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(45),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const CustomTextField(
+                          icon: Icons.email,
+                          label: 'Email',
+                        ),
+                        const CustomTextField(
+                          icon: Icons.lock,
+                          label: 'Senha',
+                          isSecret: true,
+                        ),
+                        const CustomTextField(
+                          icon: Icons.person,
+                          label: 'Nome',
+                        ),
+                        CustomTextField(
+                          icon: Icons.phone,
+                          label: 'Celular',
+                          inputFomatters: [phoneFormatter],
+                        ),
+                        CustomTextField(
+                          icon: Icons.file_copy,
+                          label: 'CPF',
+                          inputFomatters: [cpfFormatter],
+                        ),
+                        SizedBox(
+                          height: 50,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                            ),
+                            onPressed: () {},
+                            child: const Text(
+                              'Cadastrar usuário',
+                              style: TextStyle(
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
               Positioned(
                 top: 10,
                 left: 10,
@@ -111,21 +110,17 @@ class SignUpScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
-                     icon: const Icon(
+                    icon: const Icon(
                       Icons.arrow_back_ios,
                       color: Colors.white,
-                      ),
+                    ),
                   ),
                 ),
               ),
-
-              ],
-             ),
-           ),
-          ],
-               ),
+            ],
+          ),
         ),
-      ) ,
+      ),
     );
   }
 }
