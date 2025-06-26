@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:teste/src/pages/cart/cart_tab.dart';
 import 'package:teste/src/pages/home/home_tab.dart';
 import 'package:teste/src/pages/orders/orders_tab.dart';
 import 'package:teste/src/pages/profile/profile_tab.dart';
 
-// ignore: must_be_immutable
+
 class BaseScreen extends StatefulWidget {
   const BaseScreen({super.key});
 
@@ -22,15 +21,18 @@ class _BaseScreenState extends State<BaseScreen> {
       body: PageView(
         physics: const NeverScrollableScrollPhysics(),
         controller: pageController,
-        children: const [HomeTab(), CartTab(), OrdersTab(), ProfileTab()],
+        
+        children: const [
+          HomeTab(),
+          OrdersTab(),
+          ProfileTab(),
+        ],
       ),
-
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (index) {
           setState(() {
             currentIndex = index;
-            //pageController.jumpToPage(index);
             pageController.animateToPage(
               index,
               duration: const Duration(milliseconds: 300),
@@ -51,7 +53,10 @@ class _BaseScreenState extends State<BaseScreen> {
             icon: Icon(Icons.shopping_cart_outlined),
             label: 'Carrinho',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Pedidos'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list),
+            label: 'Pedidos',
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             label: 'perfil',

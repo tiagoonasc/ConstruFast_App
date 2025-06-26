@@ -1,170 +1,403 @@
-// ignore_for_file: library_prefixes
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:teste/src/config/custom_colors.dart';
-import 'package:teste/src/models/cart_item_model.dart';
-import 'package:teste/src/pages/cart/components/cart_tile.dart';
-import 'package:teste/src/pages/common_widgets/payment_dialog.dart';
-import 'package:teste/src/services/utils_services.dart';
-import 'package:teste/src/config/app_data.dart' as appData;
+import 'package:flutter/services.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class CartTab extends StatefulWidget {
-  const CartTab({super.key});
 
-  @override
-  State<CartTab> createState() => _CartTabState();
+class CustomColors {
+  static Color customSwatchColor = Colors.green;
 }
 
-class _CartTabState extends State<CartTab> {
-  final UtilsServices utilsServices = UtilsServices();
+class SignUpScreen extends StatefulWidget {
 
-  void removeItemFronCart(CartItemModel carItem) {
-    setState(() {
-      appData.cartItems.remove(carItem);
-      utilsServices.showToast(
-        message: '${carItem.item.itemName} removido (a) do carrinho');
-    });
-  }
-
-  double cartTotalPrice() {
-    double total = 0;
-
-    for (var item in appData.cartItems) {
-      total += item.totalPrice();
-    }
-
-    return total;
-  }
+  const SignUpScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Carrinho')),
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
 
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: appData.cartItems.length,
-              itemBuilder: (_, index) {
-                return CartTile(
-                  cartItem: appData.cartItems[index],
-                  remove: removeItemFronCart,
-                );
-              },
-            ),
-          ),
+class _SignUpScreenState extends State<SignUpScreen> {
+  final _formKey = GlobalKey<FormState>();
 
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(30),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.shade300,
-                  blurRadius: 3,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Total geral', style: TextStyle(fontSize: 12)),
-                    ],
-                  ),
-                ),
-                Text(
-                  utilsServices.priceToCurrency(cartTotalPrice(), 0),
-                  style: TextStyle(
-                    fontSize: 23,
-                    color: CustomColors.customSwatchColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(
-                  height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: CustomColors.customSwatchColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                    ),
-                    onPressed: () async {
-                      bool? result = await showOrderConfirmation();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final nameController = TextEditingController();
+  final phoneController = TextEditingController();
+  final cpfController = TextEditingController();
 
-                      if (!mounted) return;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-                      if (result ?? false) {
-                        showDialog(
-                          context: context,
-                          builder: (_) {
-                            return PaymentDialog(
-                              order: appData.orders.first,
-                              );
-                          },
-                        );
-                      }else{
-                        utilsServices.showToast(message: 'Pedido não confirmado',
-                         isError:true,
-                         );
-                      }
-                    },
+  bool _isLoading = false;
+  // Variável de estado para controlar se o cadastro atual é de um admin.
+  bool _isCreatingAdmin = false;
 
-                    child: const Text(
-                      'Concluir pedido',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+  static final cpfFormatter = MaskTextInputFormatter(
+    mask: '###.###.###-##',
+    filter: {'#': RegExp(r'[0-9]')},
+  );
+
+  static final phoneFormatter = MaskTextInputFormatter(
+    mask: '## # ####-####',
+    filter: {'#': RegExp(r'[0-9]')},
+  );
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    nameController.dispose();
+    phoneController.dispose();
+    cpfController.dispose();
+    super.dispose();
   }
 
-  Future<bool?> showOrderConfirmation() {
-    return showDialog<bool>(
+  // Função que exibe o diálogo para inserir a senha de administrador.
+  void _showAdminPasswordDialog() {
+    final passwordDialogController = TextEditingController();
+    showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+          title: const Text('Acesso de Administrador'),
+          content: TextField(
+            controller: passwordDialogController,
+            obscureText: true,
+            decoration: const InputDecoration(hintText: "Digite a senha mestre"),
           ),
-          title: const Text('Confirmação'),
-          content: const Text('Deseja realmente concluir o pedido?'),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: const Text('Não'),
+              child: const Text('Cancelar'),
+              onPressed: () => Navigator.of(context).pop(),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
+              child: const Text('Confirmar'),
               onPressed: () {
-                Navigator.of(context).pop(true);
+                // AVISO: A senha no código é INSEGURA para produção.
+                // Considere buscar essa senha de uma fonte segura ou usar Cloud Functions.
+                if (passwordDialogController.text == 'admin123') {
+                  setState(() {
+                    // Se a senha estiver correta, ativa o modo de criação de admin.
+                    _isCreatingAdmin = true;
+                  });
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Permissão de admin concedida para este cadastro.'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                } else {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Senha incorreta!'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               },
-              child: const Text('Sim'),
             ),
           ],
         );
       },
+    );
+  }
+
+  // Função de cadastro de usuário.
+  Future<void> _signUp() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      User? user = userCredential.user;
+
+      if (user != null) {
+        // Salva os dados no Firestore, usando a variável de estado _isCreatingAdmin.
+        await _firestore.collection('users').doc(user.uid).set({
+          'name': nameController.text.trim(),
+          'email': emailController.text.trim(),
+          'phone': phoneController.text.trim(),
+          'cpf': cpfController.text.trim(),
+          'isAdmin': _isCreatingAdmin,
+          'createdAt': Timestamp.now(),
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Usuário cadastrado com sucesso!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      }
+    } on FirebaseAuthException catch (e) {
+      String message;
+      if (e.code == 'weak-password') {
+        message = 'A senha fornecida é muito fraca.';
+      } else if (e.code == 'email-already-in-use') {
+        message = 'Já existe uma conta para este e-mail.';
+      } else {
+        message = 'Ocorreu um erro. Tente novamente.';
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ocorreu um erro inesperado: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    return Scaffold(
+      backgroundColor: CustomColors.customSwatchColor,
+      body: SingleChildScrollView(
+        child: SizedBox(
+          height: size.height,
+          width: size.width,
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        'Cadastro',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 35,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 40,
+                    ),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(45),
+                      ),
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          CustomTextField(
+                            controller: emailController,
+                            icon: Icons.email,
+                            label: 'Email',
+                            validator: (email) {
+                              if (email == null || email.isEmpty) return 'Por favor, digite seu e-mail.';
+                              if (!email.contains('@')) return 'Por favor, digite um e-mail válido.';
+                              return null;
+                            },
+                          ),
+                          CustomTextField(
+                            controller: passwordController,
+                            icon: Icons.lock,
+                            label: 'Senha',
+                            isSecret: true,
+                            validator: (password) {
+                              if (password == null || password.isEmpty) return 'Por favor, digite sua senha.';
+                              if (password.length < 6) return 'A senha deve ter no mínimo 6 caracteres.';
+                              return null;
+                            },
+                          ),
+                          CustomTextField(
+                            controller: nameController,
+                            icon: Icons.person,
+                            label: 'Nome',
+                            validator: (name) {
+                              if (name == null || name.isEmpty) return 'Por favor, digite seu nome.';
+                              return null;
+                            },
+                          ),
+                          CustomTextField(
+                            controller: phoneController,
+                            icon: Icons.phone,
+                            label: 'Celular',
+                            inputFormatters: [phoneFormatter],
+                            validator: (phone) {
+                              if (phone == null || phone.isEmpty) return 'Por favor, digite seu celular.';
+                              return null;
+                            },
+                          ),
+                          CustomTextField(
+                            controller: cpfController,
+                            icon: Icons.file_copy,
+                            label: 'CPF',
+                            inputFormatters: [cpfFormatter],
+                            validator: (cpf) {
+                              if (cpf == null || cpf.isEmpty) return 'Por favor, digite seu CPF.';
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            height: 50,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                              ),
+                              onPressed: _isLoading ? null : _signUp,
+                              child: _isLoading
+                                  ? const CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    )
+                                  : const Text(
+                                      'Cadastrar usuário',
+                                      style: TextStyle(fontSize: 18),
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // BOTÃO DE ADMIN MODIFICADO
+                          SizedBox(
+                            height: 45,
+                            child: OutlinedButton.icon(
+                              icon: Icon(
+                                _isCreatingAdmin ? Icons.check_circle : Icons.security,
+                              ),
+                              label: Text(
+                                _isCreatingAdmin ? 'Cadastrando como Admin' : 'Tornar Admin',
+                                style: const TextStyle(fontSize: 18),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: _isCreatingAdmin ? Colors.green : Colors.black87,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                                side: BorderSide(
+                                  width: 2,
+                                  color: _isCreatingAdmin ? Colors.green : Colors.grey,
+                                ),
+                              ),
+                              onPressed: () {
+                                if (_isCreatingAdmin) {
+                                  // Permite desativar o modo admin se clicar novamente
+                                  setState(() {
+                                    _isCreatingAdmin = false;
+                                  });
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Permissão de admin removida.'),
+                                      backgroundColor: Colors.orange,
+                                    ),
+                                  );
+                                } else {
+                                  // Se não for admin, mostra o diálogo para pedir a senha
+                                  _showAdminPasswordDialog();
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Positioned(
+                top: 10,
+                left: 10,
+                child: SafeArea(
+                  child: IconButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    icon: const Icon(
+                      Icons.arrow_back_ios,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+class CustomTextField extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isSecret;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextEditingController? controller;
+  final String? Function(String?)? validator;
+
+  const CustomTextField({
+    Key? key,
+    required this.icon,
+    required this.label,
+    this.isSecret = false,
+    this.inputFormatters,
+    this.controller,
+    this.validator,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: TextFormField(
+        controller: controller,
+        inputFormatters: inputFormatters,
+        obscureText: isSecret,
+        validator: validator,
+        decoration: InputDecoration(
+          prefixIcon: Icon(icon),
+          labelText: label,
+          isDense: true,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+        ),
+      ),
     );
   }
 }
