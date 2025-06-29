@@ -7,7 +7,7 @@ class ProductListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Referência para a coleção 'produtos' no Firestore
+    
     final Stream<QuerySnapshot> _productsStream =
         FirebaseFirestore.instance.collection('produtos').snapshots();
 

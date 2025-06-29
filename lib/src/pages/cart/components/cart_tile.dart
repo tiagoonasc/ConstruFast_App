@@ -8,7 +8,11 @@ class CartTile extends StatefulWidget {
   final CartItemModel cartItem;
   final Function(CartItemModel) remove;
 
-  const CartTile({super.key, required this.cartItem, required this.remove});
+  const CartTile({
+    super.key, 
+    required this.cartItem, 
+    required this.remove
+  });
 
   @override
   State<CartTile> createState() => _CartTileState();
@@ -50,13 +54,11 @@ class _CartTileState extends State<CartTile> {
           suffixText: widget.cartItem.item.unit,
           value: widget.cartItem.quantity,
           result: (quantity) {
-            setState(() {
-              widget.cartItem.quantity = quantity;
-              if (quantity == 0) {
-                //Remover item do carrinho
-                widget.remove(widget.cartItem);
-              }
-            });
+           
+            if (quantity == 0) {
+              widget.remove(widget.cartItem);
+            }
+            
           },
           isRemovable: true,
         ),

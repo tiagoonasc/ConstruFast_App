@@ -9,6 +9,7 @@ ItemModel cimento = ItemModel(
   itemName: 'Cimento',
   price: 42.90,
   unit: 'RS',
+  id: '1',
 );
 ItemModel furadeira = ItemModel(
   description: 'Furadeira de auto rendimento',
@@ -16,6 +17,7 @@ ItemModel furadeira = ItemModel(
   itemName: 'Furadeira',
   price: 239.90,
   unit: 'RS',
+  id: '2',
 );
 ItemModel piso = ItemModel(
   description: 'Porcelanato retificado',
@@ -23,6 +25,7 @@ ItemModel piso = ItemModel(
   itemName: 'Porcelanato',
   price: 80.90,
   unit: 'm2',
+  id: '32',
 );
 ItemModel tijolo = ItemModel(
   description: 'Tijolo catarina, sua paredes no padrao',
@@ -30,6 +33,7 @@ ItemModel tijolo = ItemModel(
   itemName: 'Tijolo',
   price: 00.90,
   unit: 'RS',
+  id: '1000',
 );
 ItemModel tinta = ItemModel(
   description: 'Sua obra com mais viva com as cores Suvinil',
@@ -37,6 +41,7 @@ ItemModel tinta = ItemModel(
   itemName: 'Tinta',
   price: 630.00,
   unit: 'RS',
+  id: '1',
 );
 ItemModel torneira = ItemModel(
   description: 'Torneira Docol, garantia e qualidade compravadas',
@@ -44,6 +49,7 @@ ItemModel torneira = ItemModel(
   itemName: 'Torneira',
   price: 357.90,
   unit: 'RS',
+  id: '1',
 );
 
 List<ItemModel> items = [cimento, furadeira, piso, tijolo, tinta, torneira];

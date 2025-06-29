@@ -4,7 +4,6 @@ import 'package:teste/src/pages/base/base_screen.dart';
 import 'package:teste/src/pages/common_widgets/app_name_widget.dart';
 import 'package:teste/src/pages/common_widgets/custom_text_field.dart';
 import 'package:teste/src/pages/auth/sign_up_screen.dart' hide CustomTextField;
-
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
 
@@ -27,30 +26,42 @@ class _SignInScreenState extends State<SignInScreen> {
     super.dispose();
   }
 
+  // AQUI ESTÁ A FUNÇÃO MODIFICADA COM PRINTS
   Future<void> _signIn() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
-    
     final navigator = Navigator.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
+    
+    // --- DEBUG 1: INÍCIO DA TENTATIVA ---
+    print('[SignIn] Tentando fazer login com o email: ${_emailController.text.trim()}');
 
     try {
       await _auth.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+      
+      // --- DEBUG 2: SUCESSO! ---
+      print('[SignIn] Login BEM-SUCEDIDO! UID do usuário: ${_auth.currentUser?.uid}');
 
       if (!mounted) return;
       navigator.pushReplacement(
         MaterialPageRoute(builder: (_) => const BaseScreen()),
       );
     } on FirebaseAuthException catch (e) {
+      // --- DEBUG 3: ERRO ESPECÍFICO DO FIREBASE ---
+      print('[SignIn] Ocorreu um FirebaseAuthException!');
+      print('[SignIn] CÓDIGO DO ERRO: ${e.code}');
+      print('[SignIn] MENSAGEM DO ERRO: ${e.message}');
+      
       String message = switch (e.code) {
         'user-not-found' => 'Nenhum usuário encontrado para este e-mail.',
         'wrong-password' => 'Senha incorreta. Tente novamente.',
         'invalid-email' => 'O formato do e-mail é inválido.',
+        'network-request-failed' => 'Falha na conexão de rede. Verifique sua internet.', // Adicionado para clareza
         _ => 'Ocorreu um erro ao fazer login. Verifique suas credenciais.',
       };
       
@@ -58,7 +69,19 @@ class _SignInScreenState extends State<SignInScreen> {
       scaffoldMessenger.showSnackBar(
         SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
       );
-    } finally {
+    } catch (e) {
+      // --- DEBUG 4: ERRO GENÉRICO/INESPERADO ---
+      print('[SignIn] Ocorreu um ERRO GENÉRICO não esperado: $e');
+
+      if (!mounted) return;
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(
+          content: Text('Ocorreu um erro inesperado. Tente novamente mais tarde.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+    finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }

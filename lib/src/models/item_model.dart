@@ -10,6 +10,8 @@ ItemModel({
   required this.imgUrl,
   required this.itemName,
   required this.price,
-  required this.unit,
+  required this.unit, required String id,
 });
+
+  get id => null;
 }
