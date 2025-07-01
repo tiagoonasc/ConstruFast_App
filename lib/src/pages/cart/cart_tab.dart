@@ -157,19 +157,20 @@ class _CartTabState extends State<CartTab> {
             final List<CartItemModel> cartItems =
                 snapshot.data!.docs.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
+
+              final productId = data['productId'];
+              final safeProductId = productId is String ? productId : '';
+
               return CartItemModel(
                 item: ItemModel(
-                  // CORREÇÃO DEFINITIVA:
-                  // Lê o campo 'productId' do documento e o trata como uma String.
-                  // Se for nulo ou não for uma String, retorna uma string vazia para evitar o erro.
-                  id: data['productId'] as String? ?? '',
+                  id: safeProductId,
                   itemName: data['productName'] ?? 'Nome indisponível',
                   price: (data['price'] ?? 0.0).toDouble(),
                   imgUrl: data['imageUrl'] ?? '',
                   unit: data['unit'] ?? '',
                   description: data['description'] ?? 'Descrição não informada.',
                 ),
-                quantity: data['quantity'] ?? 0,
+                quantity: (data['quantity'] ?? 0) as int,
               );
             }).toList();
 

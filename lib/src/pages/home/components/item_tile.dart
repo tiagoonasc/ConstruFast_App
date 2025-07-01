@@ -32,7 +32,7 @@ class _ItemTileState extends State<ItemTile> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Card de informações do produto
+        
         GestureDetector(
           onTap: () {
             Navigator.of(context).push(
