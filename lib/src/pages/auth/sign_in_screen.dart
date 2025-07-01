@@ -44,7 +44,7 @@ class _SignInScreenState extends State<SignInScreen> {
         password: _passwordController.text.trim(),
       );
       
-      // --- DEBUG 2: SUCESSO! ---
+     
       print('[SignIn] Login BEM-SUCEDIDO! UID do usuário: ${_auth.currentUser?.uid}');
 
       if (!mounted) return;
@@ -61,7 +61,7 @@ class _SignInScreenState extends State<SignInScreen> {
         'user-not-found' => 'Nenhum usuário encontrado para este e-mail.',
         'wrong-password' => 'Senha incorreta. Tente novamente.',
         'invalid-email' => 'O formato do e-mail é inválido.',
-        'network-request-failed' => 'Falha na conexão de rede. Verifique sua internet.', // Adicionado para clareza
+        'network-request-failed' => 'Falha na conexão de rede. Verifique sua internet.', 
         _ => 'Ocorreu um erro ao fazer login. Verifique suas credenciais.',
       };
       

@@ -6,32 +6,33 @@ import 'package:teste/src/services/utils_services.dart';
 
 class ItemTile extends StatefulWidget {
   final ItemModel item;
-  final void Function(GlobalKey) cartAnimationMethod;
+  final void Function(ItemModel, GlobalKey) onAddToCart;
 
-  const ItemTile({super.key, required this.item, required this.cartAnimationMethod});
+  const ItemTile({super.key, required this.item, required this.onAddToCart});
 
   @override
   State<ItemTile> createState() => _ItemTileState();
 }
 
 class _ItemTileState extends State<ItemTile> {
-  final GlobalKey imgeGk = GlobalKey();
-
+  final GlobalKey imageGk = GlobalKey();
   final UtilsServices utilsServices = UtilsServices();
 
-    IconData tileIcon = Icons.add_shopping_cart_outlined;
+  IconData tileIcon = Icons.add_shopping_cart_outlined;
 
-     Future<void> switchIcon() async {
+  Future<void> switchIcon() async {
     setState(() => tileIcon = Icons.check);
     await Future.delayed(const Duration(milliseconds: 1500));
-    setState(() => tileIcon = Icons.add_shopping_cart_outlined);
+    if (mounted) {
+      setState(() => tileIcon = Icons.add_shopping_cart_outlined);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        //Conteudo
+        // Card de informações do produto
         GestureDetector(
           onTap: () {
             Navigator.of(context).push(
@@ -53,15 +54,12 @@ class _ItemTileState extends State<ItemTile> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Imagem
                   Expanded(
                     child: Hero(
                       tag: widget.item.imgUrl,
-                      child: Image.asset(widget.item.imgUrl, key: imgeGk),
+                      child: Image.asset(widget.item.imgUrl, key: imageGk),
                     ),
                   ),
-
-                  // Nome
                   Text(
                     widget.item.itemName,
                     style: const TextStyle(
@@ -69,8 +67,6 @@ class _ItemTileState extends State<ItemTile> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
-                  // Preço - Unidade
                   Row(
                     children: [
                       Text(
@@ -78,10 +74,9 @@ class _ItemTileState extends State<ItemTile> {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
-                          color: CustomColors.customContrastColor,
+                          color: CustomColors.customSwatchColor,
                         ),
                       ),
-
                       Text(
                         '/${widget.item.unit}',
                         style: TextStyle(
@@ -98,34 +93,36 @@ class _ItemTileState extends State<ItemTile> {
           ),
         ),
 
-        //Botao add carrinho
+        // Botão de adicionar ao carrinho
         Positioned(
           top: 4,
           right: 4,
-          child: ClipRRect(
+          child: Material(
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(15),
               topRight: Radius.circular(20),
             ),
-            child: Material(
-              child: InkWell(
-                onTap: () {
-                  switchIcon();
-                             
-                  widget.cartAnimationMethod(imgeGk);
-                },
-                child: Ink(
-                  height: 40,
-                  width: 35,
-                  decoration: BoxDecoration(
-                    color: CustomColors.customSwatchColor,
-                  ),
-                   child: Icon(
-                    tileIcon,
-                    color: Colors.white,
-                    size: 20,
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                switchIcon();
+                widget.onAddToCart(widget.item, imageGk);
+              },
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(15),
+                topRight: Radius.circular(20),
+              ),
+              child: Ink(
+                height: 40,
+                width: 35,
+                decoration: BoxDecoration(
+                  color: CustomColors.customSwatchColor,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(15),
+                    topRight: Radius.circular(20),
                   ),
                 ),
+                child: Icon(tileIcon, color: Colors.white, size: 20),
               ),
             ),
           ),

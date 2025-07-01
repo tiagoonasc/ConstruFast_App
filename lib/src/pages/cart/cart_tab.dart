@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:teste/src/config/custom_colors.dart';
 import 'package:teste/src/models/cart_item_model.dart';
 import 'package:teste/src/models/item_model.dart';
@@ -23,19 +23,14 @@ class _CartTabState extends State<CartTab> {
 
   void removeItemFromCart(String productId) {
     final String? userId = _auth.currentUser?.uid;
-    if (userId == null) return;
+    if (userId == null || productId.isEmpty) return;
 
     _firestore
         .collection('users')
         .doc(userId)
         .collection('cart')
         .doc(productId)
-        .delete()
-        .then((_) {
-      utilsServices.showToast(message: 'Item removido do carrinho');
-    }).catchError((error) {
-      utilsServices.showToast(message: 'Erro ao remover item', isError: true);
-    });
+        .delete();
   }
 
   Future<void> _checkout(List<CartItemModel> cartItems, double total) async {
@@ -63,9 +58,13 @@ class _CartTabState extends State<CartTab> {
         };
       }).toList(),
     });
-    
+
     for (var cartItem in cartItems) {
-      final cartItemRef = _firestore.collection('users').doc(userId).collection('cart').doc(cartItem.item.id);
+      final cartItemRef = _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('cart')
+          .doc(cartItem.item.id);
       batch.delete(cartItemRef);
     }
 
@@ -92,18 +91,39 @@ class _CartTabState extends State<CartTab> {
     }
   }
 
+  Future<bool> showOrderConfirmation() async {
+    final bool? result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Confirmação'),
+          content: const Text('Deseja realmente concluir o pedido?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Não'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Sim'),
+            ),
+          ],
+        );
+      },
+    );
+    return result ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final User? user = _auth.currentUser;
-
     if (user == null) {
-      // --- DEBUG 1 ---
-      print('[CartTab] BUILD: Usuário não está logado. Exibindo tela de login.');
       return const Center(child: Text("Faça login para ver seu carrinho."));
     }
-
-    // --- DEBUG 2 ---
-    print('[CartTab] BUILD: Construindo a tela para o usuário: ${user.uid}');
 
     return Scaffold(
       appBar: AppBar(title: const Text('Carrinho')),
@@ -114,59 +134,47 @@ class _CartTabState extends State<CartTab> {
             .collection('cart')
             .snapshots(),
         builder: (context, snapshot) {
-          // --- DEBUG 3 ---
+          if (snapshot.hasError) {
+            return const Center(child: Text('Erro ao carregar o carrinho'));
+          }
           if (snapshot.connectionState == ConnectionState.waiting) {
-            print('[CartTab] STREAMBUILDER: Estado de conexão é "waiting".');
             return const Center(child: CircularProgressIndicator());
           }
-
-          // --- DEBUG 4 ---
-          if (snapshot.hasError) {
-            print('[CartTab] STREAMBUILDER: Ocorreu um erro no stream! Erro: ${snapshot.error}');
-            return Center(child: Text('Ocorreu um erro: ${snapshot.error}'));
-          }
-
-          // --- DEBUG 5 ---
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            print('[CartTab] STREAMBUILDER: O stream não retornou dados ou a lista de documentos está vazia.');
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.remove_shopping_cart, size: 40, color: CustomColors.customSwatchColor),
+                  Icon(Icons.remove_shopping_cart,
+                      size: 40, color: CustomColors.customSwatchColor),
                   const Text('Não há itens no carrinho'),
                 ],
               ),
             );
           }
 
-          // --- DEBUG 6 ---
-          print('[CartTab] STREAMBUILDER: Stream retornou ${snapshot.data!.docs.length} documento(s).');
-
           try {
-            final List<CartItemModel> cartItems = snapshot.data!.docs.map((doc) {
+            final List<CartItemModel> cartItems =
+                snapshot.data!.docs.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
-              
-              // --- DEBUG 7 ---
-              print('[CartTab] Mapeando documento: ID=${doc.id}, DADOS=${data}');
-
               return CartItemModel(
                 item: ItemModel(
-                  id: doc.id,
+                  // CORREÇÃO DEFINITIVA:
+                  // Lê o campo 'productId' do documento e o trata como uma String.
+                  // Se for nulo ou não for uma String, retorna uma string vazia para evitar o erro.
+                  id: data['productId'] as String? ?? '',
                   itemName: data['productName'] ?? 'Nome indisponível',
                   price: (data['price'] ?? 0.0).toDouble(),
                   imgUrl: data['imageUrl'] ?? '',
                   unit: data['unit'] ?? '',
-                  description: data['description'] ?? '',
+                  description: data['description'] ?? 'Descrição não informada.',
                 ),
                 quantity: data['quantity'] ?? 0,
               );
             }).toList();
-            
-            // --- DEBUG 8 ---
-            print('[CartTab] Mapeamento para CartItemModel concluído com sucesso. Itens na lista: ${cartItems.length}');
 
-            final double total = cartItems.fold(0.0, (sum, item) => sum + item.totalPrice());
+            final double total =
+                cartItems.fold(0.0, (sum, item) => sum + item.totalPrice());
 
             return Column(
               children: [
@@ -176,7 +184,8 @@ class _CartTabState extends State<CartTab> {
                     itemBuilder: (_, index) {
                       return CartTile(
                         cartItem: cartItems[index],
-                        remove: (cartItem) => removeItemFromCart(cartItem.item.id),
+                        remove: (cartItem) =>
+                            removeItemFromCart(cartItem.item.id),
                       );
                     },
                   ),
@@ -185,8 +194,14 @@ class _CartTabState extends State<CartTab> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                    boxShadow: [BoxShadow(color: Colors.grey.shade300, blurRadius: 3, spreadRadius: 2)],
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(30)),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.grey.shade300,
+                          blurRadius: 3,
+                          spreadRadius: 2)
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -206,15 +221,17 @@ class _CartTabState extends State<CartTab> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: CustomColors.customSwatchColor,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18)),
                           ),
                           onPressed: () async {
-                            bool? result = await showOrderConfirmation();
-                            if (result ?? false) {
+                            bool result = await showOrderConfirmation();
+                            if (result) {
                               _checkout(cartItems, total);
                             }
                           },
-                          child: const Text('Concluir pedido', style: TextStyle(fontSize: 18)),
+                          child: const Text('Concluir pedido',
+                              style: TextStyle(fontSize: 18)),
                         ),
                       ),
                     ],
@@ -222,35 +239,13 @@ class _CartTabState extends State<CartTab> {
                 ),
               ],
             );
-          } catch (e, stacktrace) {
-            // --- DEBUG 9 ---
-            print('[CartTab] ERRO CRÍTICO AO MAPEAR OS DADOS: $e');
-            print('STACKTRACE: $stacktrace');
-            return Center(child: Text('Erro ao processar dados do carrinho: $e'));
+          } catch (e) {
+            print("ERRO AO PROCESSAR CARRINHO: $e");
+            return Center(
+                child: Text("Ocorreu um erro ao exibir os itens: $e"));
           }
         },
       ),
-    );
-  }
-
-  Future<bool?> showOrderConfirmation() {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('Confirmação'),
-          content: const Text('Deseja realmente concluir o pedido?'),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Não')),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Sim'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
