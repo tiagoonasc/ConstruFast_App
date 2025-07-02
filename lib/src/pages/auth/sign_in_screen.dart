@@ -26,7 +26,7 @@ class _SignInScreenState extends State<SignInScreen> {
     super.dispose();
   }
 
-  // AQUI ESTÁ A FUNÇÃO MODIFICADA COM PRINTS
+  
   Future<void> _signIn() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -35,7 +35,7 @@ class _SignInScreenState extends State<SignInScreen> {
     final navigator = Navigator.of(context);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     
-    // --- DEBUG 1: INÍCIO DA TENTATIVA ---
+    
     print('[SignIn] Tentando fazer login com o email: ${_emailController.text.trim()}');
 
     try {
@@ -52,7 +52,7 @@ class _SignInScreenState extends State<SignInScreen> {
         MaterialPageRoute(builder: (_) => const BaseScreen()),
       );
     } on FirebaseAuthException catch (e) {
-      // --- DEBUG 3: ERRO ESPECÍFICO DO FIREBASE ---
+      
       print('[SignIn] Ocorreu um FirebaseAuthException!');
       print('[SignIn] CÓDIGO DO ERRO: ${e.code}');
       print('[SignIn] MENSAGEM DO ERRO: ${e.message}');
@@ -70,7 +70,7 @@ class _SignInScreenState extends State<SignInScreen> {
         SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
       );
     } catch (e) {
-      // --- DEBUG 4: ERRO GENÉRICO/INESPERADO ---
+      
       print('[SignIn] Ocorreu um ERRO GENÉRICO não esperado: $e');
 
       if (!mounted) return;
