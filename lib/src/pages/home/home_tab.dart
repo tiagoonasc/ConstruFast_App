@@ -1,4 +1,4 @@
-import 'dart:async'; 
+import 'dart:async';
 import 'package:add_to_cart_animation/add_to_cart_animation.dart';
 import 'package:add_to_cart_animation/add_to_cart_icon.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,7 +8,12 @@ import 'package:teste/src/models/item_model.dart';
 import 'package:teste/src/pages/home/components/item_tile.dart';
 
 class HomeTab extends StatefulWidget {
-  const HomeTab({super.key});
+  final PageController pageController;
+
+  const HomeTab({
+    super.key,
+    required this.pageController,
+  });
 
   @override
   State<HomeTab> createState() => _HomeTabState();
@@ -19,7 +24,6 @@ class _HomeTabState extends State<HomeTab> {
   late Function(GlobalKey) runAddToCardAnimation;
   int cartQuantity = 0;
 
-  
   StreamSubscription? _cartSubscription;
 
   @override
@@ -28,7 +32,6 @@ class _HomeTabState extends State<HomeTab> {
     _listenCartQuantity();
   }
 
-  
   @override
   void dispose() {
     _cartSubscription?.cancel();
@@ -39,7 +42,6 @@ class _HomeTabState extends State<HomeTab> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    
     _cartSubscription = FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
@@ -49,12 +51,10 @@ class _HomeTabState extends State<HomeTab> {
       int totalQuantity = 0;
       for (var doc in snapshot.docs) {
         final data = doc.data();
-        
         if (data.containsKey('quantity') && data['quantity'] is num) {
           totalQuantity += (data['quantity'] as num).toInt();
         }
       }
-      
       if (mounted) {
         setState(() {
           cartQuantity = totalQuantity;
@@ -67,7 +67,6 @@ class _HomeTabState extends State<HomeTab> {
     final String? userId = FirebaseAuth.instance.currentUser?.uid;
 
     if (userId == null) {
-      // CORREÇÃO 2: Verificar se o context ainda é válido
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -102,11 +101,11 @@ class _HomeTabState extends State<HomeTab> {
             'createdAt': FieldValue.serverTimestamp(),
           });
         } else {
-            final currentQuantity = (doc.data()?['quantity'] ?? 0) as int;
+          final currentQuantity = (doc.data()?['quantity'] ?? 0) as int;
           transaction.update(cartItemRef, {'quantity': currentQuantity + 1});
         }
       });
-      
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -114,7 +113,6 @@ class _HomeTabState extends State<HomeTab> {
           backgroundColor: Colors.green,
         ),
       );
-
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -139,7 +137,7 @@ class _HomeTabState extends State<HomeTab> {
             padding: const EdgeInsets.only(top: 15, right: 15),
             child: GestureDetector(
               onTap: () {
-                
+                widget.pageController.jumpToPage(1);
               },
               child: AddToCartIcon(
                 key: globalKeyCartItems,
@@ -148,12 +146,12 @@ class _HomeTabState extends State<HomeTab> {
                   children: [
                     const Icon(
                       Icons.shopping_cart,
-                      size: 28, 
+                      size: 28,
                     ),
                     if (cartQuantity > 0)
                       Positioned(
                         right: 0,
-                        top: 2, 
+                        top: 2,
                         child: Container(
                           padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
@@ -192,9 +190,10 @@ class _HomeTabState extends State<HomeTab> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: TextFormField(
-                  decoration: InputDecoration(
+                decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
                   isDense: true,
@@ -206,7 +205,8 @@ class _HomeTabState extends State<HomeTab> {
                   prefixIcon: const Icon(Icons.search, size: 21),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(60),
-                    borderSide: const BorderSide(width: 0, style: BorderStyle.none),
+                    borderSide:
+                        const BorderSide(width: 0, style: BorderStyle.none),
                   ),
                 ),
               ),
@@ -224,7 +224,8 @@ class _HomeTabState extends State<HomeTab> {
                     return Center(child: Text('Erro: ${snapshot.error}'));
                   }
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Center(child: Text('Nenhum produto encontrado.'));
+                    return const Center(
+                        child: Text('Nenhum produto encontrado.'));
                   }
 
                   final List<ItemModel> loadedItems =
@@ -241,7 +242,7 @@ class _HomeTabState extends State<HomeTab> {
                   }).toList();
 
                   return GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16), 
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                     physics: const BouncingScrollPhysics(),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
@@ -254,10 +255,11 @@ class _HomeTabState extends State<HomeTab> {
                     itemBuilder: (_, index) {
                       return ItemTile(
                         item: loadedItems[index],
-                         onAddToCart: (item, imageKey) {
-                         Future.delayed(const Duration(milliseconds: 100), () {
-                         addToCart(item);
-                         runAddToCardAnimation(imageKey);
+                        onAddToCart: (item, imageKey) {
+                          Future.delayed(const Duration(milliseconds: 100),
+                              () {
+                            addToCart(item);
+                            runAddToCardAnimation(imageKey);
                           });
                         },
                       );
@@ -272,4 +274,3 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 }
-                  

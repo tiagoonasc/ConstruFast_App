@@ -10,6 +10,7 @@ import 'package:teste/src/pages/common_widgets/payment_dialog.dart';
 import 'package:teste/src/services/utils_services.dart';
 
 class CartTab extends StatefulWidget {
+ 
   const CartTab({super.key});
 
   @override
